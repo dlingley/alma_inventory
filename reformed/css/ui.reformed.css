@@ -1,0 +1,121 @@
+/* 
+    Document   : ui.reformed.css
+    Created on : Dec 5, 2010, 1:57:40 AM
+    Author     : PaulPullen
+    Description:
+        This CSS file contains the base styles for forms created using the reformed app.
+        Other styling should be done by using the jQuery UI Themeroller.
+*/
+
+.reformed-form dl {
+    display: block;
+    margin: 4px;
+    position:relative;
+}
+
+.reformed-form dt {
+    display:block;
+    float:left;
+    clear:left;
+    min-width: 100px;
+    text-align:right;
+    padding: 4px;
+}
+
+.reformed-form dt label {
+    font-weight: bold;
+}
+
+.reformed-form dd {
+    display:block;
+    padding:4px;
+    float:left;    
+}
+
+.reformed-form fieldset {
+    padding: 10px;
+    margin: 5px;
+    display:block;
+}
+
+.reformed-form legend {
+    padding: 5px  10px;
+    margin-left: 10px;
+}
+
+.reformed-form input, .reformed-form textarea {
+    padding: 3px;
+}
+
+/*errors*/
+.reformed-form label.error_msg{
+    padding: 2px 4px;
+    font-size: .8em;
+    margin-left:4px;
+    font-weight:normal;
+    display:block;
+    float:left;
+}
+
+.reformed-form dl dd.ui-state-error {
+    float:left;
+    -moz-border-radius: 4px;
+    -webkit-border-radius: 4px;
+    border-radius:4px;
+    position: absolute;
+    right: 3px;
+    top: 3px;
+}
+
+.reformed-form .ui-state-error .ui-icon {
+    float:left;
+    margin: 0px !important;
+}
+
+/* radio and checkbox list styles */
+.reformed-form div.radio {
+    position: static;
+}
+
+.reformed-form dd ul li{
+    display: block;
+    float: left;
+    clear: left;
+    margin: 0;
+}
+
+.reformed-form dd ul li label {
+    float: left;
+    margin-top: 2px;
+}
+
+/* text input styles */
+.reformed-form input[type="text"], .reformed-form input[type="password"] {
+    width: 165px;
+}
+
+/*multiple select*/
+.reformed-form select {
+    min-width: 165px;
+}
+
+/*submit button div */
+.reformed-form div#submit_buttons {
+    margin-left: 300px;
+}
+
+/* changes made to Aristo uniform default theme */
+/* get rid of white box around file input button */
+div.uploader span.action {
+    background-color: transparent !important;
+}
+
+/* CSS below is to prevent conficts with other CSS on the reformed site--may be OK to comment out/remove */
+.reformed-form .ui-state-highlight {
+    padding: 3px;
+}
+
+.reformed-form .ui-state-default .ui-button-text { background: 0 none !important; color: inherit; border-color: inherit; }
+.reformed-form .ui-state-hover .ui-button-text { background: 0 none !important; color: inherit; border-color: inherit; -moz-box-shadow: 0 0 0 rgba(0, 0, 0, 0); -webkit-box-shadow: 0px 0px 0px rgba(0,0,0,0); box-shadow: 0px 0px 0px rgba(0,0,0,0); }
+.reformed-form .ui-state-active .ui-button-text { background: 0 none !important; color: inherit; border-color: inherit; }
+.reformed-form .ui-button .ui-button-text {text-shadow: none; }
