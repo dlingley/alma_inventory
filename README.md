@@ -11,8 +11,6 @@ Add Alma API key in place of: *YOUR KEY HERE*
 
 # almaLocationsAPI.php
 Add Alma API key in place of: *YOUR KEY HERE*
-Change $templateParamValues = array(urlencode('hsse')); to library code you want to retrieve library locations list for.
-* Had plans to prompt for this but have yet to need it so never did.
 
 # index.php
 Add Alma BIB API key in place of: *YOUR KEY HERE*
