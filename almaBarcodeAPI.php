@@ -1,6 +1,6 @@
 <?php
 
-if (!defined('ALMA_SHELFLIST_API_KEY')) define('ALMA_SHELFLIST_API_KEY', '*YOUR KEY HERE*');
+require("key.php");
 
 // set the Caching Frequency - neverExpire, Daily, Hourly or None (No Caching) (recommended default: Daily)
 if (!defined('CACHE_FREQUENCY')) define('CACHE_FREQUENCY', 'Daily');

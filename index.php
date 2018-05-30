@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <?php
 //require("login.php");
+require("key.php");
 
 if(!isset($_SESSION))
     {
@@ -463,7 +464,7 @@ p[data-value]:after {
               <?Php
 $ch = curl_init();
 $url = 'https://api-na.hosted.exlibrisgroup.com/almaws/v1/conf/libraries';
-$queryParams = '?' . urlencode('lang') . '=' . urlencode('en') . '&' . urlencode('apikey') . '=' . urlencode('*YOUR KEY HERE*');
+$queryParams = '?' . urlencode('lang') . '=' . urlencode('en') . '&' . urlencode('apikey') . '=' . ALMA_SHELFLIST_API_KEY;
 curl_setopt($ch, CURLOPT_URL, $url . $queryParams);
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
 curl_setopt($ch, CURLOPT_HEADER, FALSE);

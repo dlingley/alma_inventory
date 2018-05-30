@@ -4,8 +4,6 @@
 //the require statements in index.php and almaLocationsAPI.php
 require('CAS.php');
 
-// set your Alma Booking API Key
-define("ALMA_SHELFLIST_API_KEY","*YOUR KEY HERE*");
 
 $user = phpCAS::getUser();
 /*echo $user;
