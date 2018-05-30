@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<?php require("login.php");
+<?php
+//require("login.php");
 
 if(!isset($_SESSION))
     {

@@ -1,6 +1,6 @@
 <?Php
 
-require("login.php");
+//require("login.php");
 @$lib_id=$_GET['lib_id'];
 $ch = curl_init();
 $url = 'https://api-na.hosted.exlibrisgroup.com/almaws/v1/conf/libraries/'. $lib_id .'/locations';

@@ -1,5 +1,7 @@
 <?php
-
+//this is the setup used for Purdue the CAS.php is not included in this repo and would
+//need to be installed separately.  If you wish to enable Authentication then uncomment
+//the require statements in index.php and almaLocationsAPI.php
 require('CAS.php');
 
 // set your Alma Booking API Key
