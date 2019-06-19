@@ -1,3 +1,6 @@
+## This code is no longer being updated: The setup instructions are still valid - The repository that contains updated code is here: https://github.com/dlingley/alma_inventory_docker
+
+
 # alma_inventory
 A PHP webapp which allows libraries to run a list of scanned barcodes and find which books are out of place
 
