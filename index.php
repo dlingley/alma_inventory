@@ -461,7 +461,7 @@ p[data-value]:after {
     			</dt>
     			<dd>
     				<select size="1" name="library" id="library" class="required"  onchange=AjaxFunction();>
-              <?Php
+              <?php
 $ch = curl_init();
 $url = 'https://api-na.hosted.exlibrisgroup.com/almaws/v1/conf/libraries';
 $queryParams = '?' . urlencode('lang') . '=' . urlencode('en') . '&' . urlencode('apikey') . '=' . ALMA_SHELFLIST_API_KEY;

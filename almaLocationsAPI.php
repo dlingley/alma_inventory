@@ -1,4 +1,4 @@
-<?Php
+<?php
 require("key.php");
 //Uncomment below if you wish to enable authentication
 //require("login.php");
