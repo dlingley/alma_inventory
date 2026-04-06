@@ -51,6 +51,8 @@ if (!defined('CACHE_FREQUENCY')) define('CACHE_FREQUENCY', 'Daily');
          //Was critical option setting for this, as API redirects response
          curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
          curl_setopt($ch, CURLOPT_URL, $url);
+         curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
+         curl_setopt($ch, CURLOPT_TIMEOUT, 15);
          $result = curl_exec($ch);
 
          if (isset($_GET['debug'])) {

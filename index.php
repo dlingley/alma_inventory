@@ -176,7 +176,7 @@ $(document).ready(function() {
                         pBar.value = obj.percentage;
                         $('.progress-value').html(obj.job + ': ' + obj.percentage + '%');
                         if (obj.percentage < 100 || obj.job != "complete" ){
-                            setTimeout(progressLoop(barName), (1000*2));
+                            setTimeout(function(){ progressLoop(barName); }, 1000*2);
                         }
                     },
                     error: function(xhr,status,err){

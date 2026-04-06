@@ -32,6 +32,9 @@
 
 <?php
 
+// Allow long-running barcode processing (large inventories can take many minutes)
+set_time_limit(600);
+
 //pre($_POST);
 //Include XLSX Reader
 include 'simplexlsx/simplexlsx.class.php';
