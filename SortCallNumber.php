@@ -195,6 +195,17 @@ function NormalizeLC($lc_call_no_orig)
         $tokens[$first_digit_group_idx] .= '_000000000000000';
     }
 
+		// Pad the numeric portion of cutter tokens (already lowercased, e.g. "n857" -> "n857000000000000")
+		// so that cutter numbers are treated as decimal fractions.
+		// Without this, "n8576" would sort before "n857" because the underscore
+		// separator following "n857" has a higher ASCII value than the digit "6".
+		$token_count = count($tokens);
+		for ($i = 0; $i < $token_count; $i++) {
+			if (preg_match('/^([a-z!]+)(\d+)(.*)$/', $tokens[$i], $m)) {
+				$tokens[$i] = $m[1] . str_pad($m[2], 15, "0", STR_PAD_RIGHT) . $m[3];
+			}
+		}
+
     $key = implode("_", $tokens);
 		return $key;
 	}
