@@ -118,59 +118,64 @@ if (isset($_POST['submit'])) {
       list($num_cols, $num_rows) = $xlsx->dimension();
 
         //load callNumber array and sort for printing below
-        //Rows in sheet 1
-        $row=1;
-        foreach( $xlsx->rows() as $k => $r ) {
-          // Start the session when using it. Not before or out of the loop. Remember that you are only using it to store the % of progress.
-           session_start();
-            //Skip First row
-            if ($k == 0) {
-              //Check that first cell is header "barcodes"
-              if($r[0] == 'barcodes')
-              {
-                continue; // Header is ok, skip first row and continue
-              }
-              else {
-                echo "Upload file must have header row labeled barcodes";
-                exit;
-              }
-            }
-                //only need first column from Excel sheet, so hard coding 0 for column #
-                $barcode = $r[0];
-                //echo($barcode);
-                /*
-                //object elements returned from retrieveBarcodeInfo function call below
-                $item_obj->title = (string)$xml_barcode_result->bib_data->title;
-                $item_obj->item_link = (string)$xml_barcode_result['link']."?apikey=" . ALMA_SHELFLIST_API_KEY;
-                $item_obj->mms_id = (string)$xml_barcode_result->bib_data->mms_id;
-                $item_obj->bib_link = (string)$xml_barcode_result->bib_data['link']."?apikey=" . ALMA_SHELFLIST_API_KEY;
-                $item_obj->holding_id = (string)$xml_barcode_result->holding_data->holding_id;
-                $item_obj->holding_link = (string)$xml_barcode_result->holding_data['link']."?apikey=" . ALMA_SHELFLIST_API_KEY;
-                $item_obj->item_pid = (string)$xml_barcode_result->item_data->pid;
-                $item_obj->item_barcode = (string)$xml_barcode_result->item_data->barcode;
-                $item_obj->call_number = (string)$xml_barcode_result->holding_data->call_number. " " . (string)$xml_barcode_result->item_data->enumeration_a. " " . (string)$xml_barcode_result->item_data->chronology_i;
-                $item_obj->in_temp_location = (string)$xml_barcode_result->holding_data->in_temp_location;
-                $item_obj->call_number_type = (string)$xml_barcode_result->holding_data->call_number_type;
-                $item_obj->status = (string)$xml_barcode_result->item_data->base_status;
-                $item_obj->status_desc = (string)$xml_barcode_result->item_data->base_status['desc'];
-                $item_obj->process_type = (string)$xml_barcode_result->item_data->process_type;
-                $item_obj->library = (string)$xml_barcode_result->item_data->library;
-                $item_obj->location = (string)$xml_barcode_result->item_data->location;
-                $item_obj->physical_material_type = (string)$xml_barcode_result->item_data->physical_material_type;
-                $item_obj->item_note3 = (string)$xml_barcode_result->item_data->internal_note_3;
-                $item_obj->requested = (string)$xml_barcode_result->item_data->requested;
-                $item_obj->policy = (string)$xml_barcode_result->item_data->policy;
-                */
-                $itemData = retrieveBarcodeInfo($barcode);
 
+        // --- Pass 1: read all barcodes from the spreadsheet in scan order ---
+        // We collect them first so we can fetch them all in parallel batches
+        // without ever losing the original row number (scan_loc).
+        $barcodes_by_row = [];
+        $row = 1;
+        foreach ($xlsx->rows() as $k => $r) {
+            if ($k == 0) {
+                if ($r[0] == 'barcodes') {
+                    continue;
+                } else {
+                    echo "Upload file must have header row labeled barcodes";
+                    exit;
+                }
+            }
+            $barcodes_by_row[$row] = $r[0];
+            $row++;
+        }
+
+        // --- Pass 2: fetch all barcodes in parallel batches of 10 ---
+        // retrieveBarcodesInBatch() returns results keyed by the same row numbers
+        // passed in, so scan order is always preserved regardless of response order.
+        $batch_size = 10;
+        $all_item_data = [];
+        $batch_keys = array_keys($barcodes_by_row);
+        $total_barcodes = count($batch_keys);
+        $processed = 0;
+
+        foreach (array_chunk($batch_keys, $batch_size) as $chunk_row_nums) {
+            $chunk = [];
+            foreach ($chunk_row_nums as $r) {
+                $chunk[$r] = $barcodes_by_row[$r];
+            }
+
+            $batch_results = retrieveBarcodesInBatch($chunk);
+            $all_item_data += $batch_results; // keys are row numbers; order preserved
+
+            $processed += count($chunk);
+            $percentage = round($processed * 100 / $total_barcodes);
+            session_start();
+            $_SESSION['percentage'] = $percentage;
+            $_SESSION['job'] = "Retrieving Barcodes From API";
+            if ($percentage >= 100) {
+                $_SESSION['job'] = "complete";
+                $_SESSION['percentage'] = 0;
+            }
+            session_write_close();
+        }
+
+        // --- Pass 3: normalise call numbers and build $unsorted ---
+        // scan_loc is assigned from the original row key — never from response order.
+        foreach ($all_item_data as $scan_row => $itemData) {
                 //If Barcode Not Found Write Scanned Barcode to Item Object So it Will print on report
                 if ($itemData->item_barcode == '')
                 {
-                  $itemData->item_barcode = $barcode;
+                  $itemData->item_barcode = $barcodes_by_row[$scan_row];
                   $itemData->title = 'NOT FOUND';
                   $itemData->call_sort = '!';
-
-
                 }
                 else {
                   //Barcode was found so we can store a normalized call number to use for sorting
@@ -182,27 +187,10 @@ if (isset($_POST['submit'])) {
                   else {
                     $itemData->call_sort = normalizeLC($itemData->call_number);
                   }
-
                 }
-                //For (dubugging) view item info
-                //pre($itemData);
-                //store to array for sorting
-                $unsorted[$row] = $itemData;
-                $unsorted[$row]->scan_loc = $row;
-
-                $row= $row+1;
-
-                $percentage = round($row * 100 / $num_rows); // determine the % of completion / load
-                //THIS is the most important part. This function will close the session writting. Why? Because if the script loop is still running, the $_SESSION will be unaccesible and you have to wait till it ends to access it.
-                $_SESSION['percentage'] = $percentage;
-                $_SESSION['job'] = "Retrieving Barcodes From API";
-                if ($percentage == 100)
-                {
-                  $_SESSION['job'] = "complete";
-                  $_SESSION['percentage'] = 0;
-                }
-
-     session_write_close();
+                //store to array for sorting, keyed by original scan row
+                $unsorted[$scan_row] = $itemData;
+                $unsorted[$scan_row]->scan_loc = $scan_row;
         }
         //pre($unsorted);
         //This converts arroy of stdClass objects to a mutlidimensional
