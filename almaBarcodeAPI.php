@@ -45,15 +45,33 @@ if (!defined('CACHE_FREQUENCY')) define('CACHE_FREQUENCY', 'Daily');
 
      // if no cache data available, query the Alma API
      if (!$xml_barcode_result) {
-         // use curl to make the API request
-         $ch = curl_init();
-         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-         //Was critical option setting for this, as API redirects response
-         curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
-         curl_setopt($ch, CURLOPT_URL, $url);
-         curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
-         curl_setopt($ch, CURLOPT_TIMEOUT, 15);
-         $result = curl_exec($ch);
+         // use curl to make the API request, retrying up to 3 times on transient failures
+         $max_attempts = 3;
+         $result = false;
+         for ($attempt = 1; $attempt <= $max_attempts; $attempt++) {
+             $ch = curl_init();
+             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+             //Was critical option setting for this, as API redirects response
+             curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+             curl_setopt($ch, CURLOPT_URL, $url);
+             curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
+             curl_setopt($ch, CURLOPT_TIMEOUT, 15);
+             $result = curl_exec($ch);
+             $curl_error = curl_errno($ch);
+             curl_close($ch);
+
+             if ($result !== false && $curl_error === 0) {
+                 break; // success
+             }
+
+             if (isset($_GET['debug'])) {
+                 print("cURL attempt $attempt failed (errno $curl_error); " . ($attempt < $max_attempts ? "retrying...<br>\n" : "giving up.<br>\n"));
+             }
+
+             if ($attempt < $max_attempts) {
+                 sleep($attempt); // brief back-off: 1s, then 2s
+             }
+         }
 
          if (isset($_GET['debug'])) {
              print("xml result from API<br>\n");
@@ -61,15 +79,14 @@ if (!defined('CACHE_FREQUENCY')) define('CACHE_FREQUENCY', 'Daily');
          }
 
          // save result to cache
-         if (strcmp(CACHE_FREQUENCY, "None") && is_writable("cache/barcodes/")) {
+         if ($result !== false && strcmp(CACHE_FREQUENCY, "None") && is_writable("cache/barcodes/")) {
              file_put_contents("cache/barcodes/" . $barcode . ".xml", $result);
              if (isset($_GET['debug'])) {
                  print("Barcode File written to cache\n");
              }
          }
 
-         $xml_barcode_result = simplexml_load_string($result);
-         curl_close($ch);
+         $xml_barcode_result = $result !== false ? simplexml_load_string($result) : false;
      }
 
      // PARSE RESULTS
